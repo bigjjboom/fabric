@@ -25,6 +25,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/storage"
 	"github.com/syndtr/goleveldb/leveldb/table"
 	"github.com/syndtr/goleveldb/leveldb/util"
+	"github.com/tsuna/gohbase"
 )
 
 // DB is a LevelDB database.
@@ -882,6 +883,11 @@ func (db *DB) NewIterator(slice *util.Range, ro *opt.ReadOptions) iterator.Itera
 	// Iterator holds 'version' lock, 'version' is immutable so snapshot
 	// can be released after iterator created.
 	return db.newIterator(nil, nil, se.seq, slice, ro)
+}
+
+// NewHbaseIterator returns an iterator of the hbase
+func (db *DB) NewHbaseIterator(client gohbase.Client, table string, startkey []byte, endkey []byte) iterator.Iterator {
+	return iterator.NewHbaseIterator(client, table, startkey, endkey)
 }
 
 // GetSnapshot returns a latest snapshot of the underlying DB. A snapshot

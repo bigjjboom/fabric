@@ -10,10 +10,11 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/memdb"
 	"github.com/syndtr/goleveldb/leveldb/storage"
+
+	"reflect"
 )
 
 // ErrBatchCorrupted records reason of batch corruption. This error will be
@@ -63,10 +64,16 @@ func (index batchIndex) kv(data []byte) (key, value []byte) {
 	return index.k(data), index.v(data)
 }
 
+type Keyvalue struct {
+	Key []byte
+	Value []byte
+}
+
 // Batch is a write batch.
 type Batch struct {
 	data  []byte
 	index []batchIndex
+	Key_Value []Keyvalue
 
 	// internalLen is sums of key/value pair length plus 8-bytes internal key.
 	internalLen int
@@ -116,6 +123,8 @@ func (b *Batch) appendRec(kt keyType, key, value []byte) {
 // before.
 func (b *Batch) Put(key, value []byte) {
 	b.appendRec(keyTypeVal, key, value)
+	kv := Keyvalue{key, value}
+	b.Key_Value = append(b.Key_Value, kv)
 }
 
 // Delete appends 'delete operation' of the given key to the batch.
@@ -123,6 +132,19 @@ func (b *Batch) Put(key, value []byte) {
 // not before.
 func (b *Batch) Delete(key []byte) {
 	b.appendRec(keyTypeDel, key, nil)
+
+	signal := false
+	for i := range b.Key_Value {
+		if reflect.DeepEqual(b.Key_Value[i].Key, key) {
+			b.Key_Value[i].Value = []byte("del")
+			signal = true
+			//b.Key_Value = append(b.Key_Value[:i], b.Key_Value[i+1:]...)
+		}
+	}
+	if !signal {
+		b.Put(key, []byte("del"))
+	}
+
 }
 
 // Dump dumps batch contents. The returned slice can be loaded into the

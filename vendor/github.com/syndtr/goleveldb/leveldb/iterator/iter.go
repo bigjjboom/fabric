@@ -12,6 +12,9 @@ import (
 	"errors"
 
 	"github.com/syndtr/goleveldb/leveldb/util"
+	"github.com/tsuna/gohbase"
+	"github.com/tsuna/gohbase/hrpc"
+	"context"
 )
 
 var (
@@ -130,3 +133,85 @@ func (i *emptyIterator) Error() error         { return i.err }
 func NewEmptyIterator(err error) Iterator {
 	return &emptyIterator{err: err}
 }
+
+// The Hbase Iterator
+type HbaseIterator struct {
+	util.BasicReleaser
+	err error
+
+	client gohbase.Client
+	table []byte
+	scanner hrpc.Scanner
+	res *hrpc.Result
+}
+
+func (i *HbaseIterator) Valid() bool {
+	return i.err == nil && i.scanner != nil
+}
+
+func (i *HbaseIterator) Error() error {
+	return i.err
+}
+
+func (i *HbaseIterator) First() bool {
+	return false
+}
+
+func (i *HbaseIterator) Last() bool {
+	return false
+}
+
+func (i *HbaseIterator) Seek(key []byte) bool {
+	scanstr, err := hrpc.NewScanRange(context.Background(), i.table, key, nil)
+	if err != nil {
+		i.err = err
+		return false
+	}
+
+	i.scanner = i.client.Scan(scanstr)
+
+	return true
+}
+
+func (i *HbaseIterator) Next() bool {
+	res, err := i.scanner.Next()
+	if err != nil {
+		i.err = err
+		return false
+	}else {
+		i.res = res
+		return true
+	}
+}
+
+func (i *HbaseIterator) Prev() bool {
+	return false
+}
+
+func (i *HbaseIterator) Key() []byte {
+	if i.res == nil || len(i.res.Cells) == 0 {
+		return nil
+	}
+	tmp := *i.res
+	return tmp.Cells[0].Row
+}
+
+func (i *HbaseIterator) Value() []byte {
+	if i.res == nil || len(i.res.Cells) == 0 {
+		return nil
+	}
+	tmp := *i.res
+	return tmp.Cells[0].Value
+}
+
+func NewHbaseIterator(client gohbase.Client, table string, startkey []byte, endkey []byte) Iterator {
+	scanstr, err := hrpc.NewScanRange(context.Background(), []byte(table), startkey, endkey)
+	if err != nil {
+		return nil
+	}
+	scanner := client.Scan(scanstr)
+
+	return &HbaseIterator{client:client, table:[]byte(table), scanner:scanner, err:nil, res:nil}
+}
+//
+
