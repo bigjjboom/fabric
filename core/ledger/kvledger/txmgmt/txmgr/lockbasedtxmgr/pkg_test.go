@@ -44,7 +44,8 @@ type testEnv interface {
 
 // Tests will be run against each environment in this array
 // For example, to skip CouchDB tests, remove &couchDBLockBasedEnv{}
-var testEnvs = []testEnv{&levelDBLockBasedEnv{}, &couchDBLockBasedEnv{}}
+//var testEnvs = []testEnv{&levelDBLockBasedEnv{}, &couchDBLockBasedEnv{}}
+var testEnvs = []testEnv{&levelDBLockBasedEnv{}}
 
 ///////////// LevelDB Environment //////////////
 
