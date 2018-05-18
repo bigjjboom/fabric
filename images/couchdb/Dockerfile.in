@@ -8,6 +8,7 @@ FROM _BASE_NS_/fabric-baseimage:_BASE_TAG_
 
 # Add CouchDB user account
 RUN groupadd -r couchdb && useradd -d /opt/couchdb -g couchdb couchdb
+RUN sed -i 's#http://archive.ubuntu.com#http://mirrors.163.com#g' /etc/apt/sources.list
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
     ca-certificates \
