@@ -33,9 +33,10 @@ import (
 
 func TestKVLedgerBlockStorage(t *testing.T) {
 	env := newTestEnv(t)
-	defer env.cleanup()
+	//defer env.cleanup()
 	provider, _ := NewProvider()
 	defer provider.Close()
+	defer cleanup(provider, env)
 
 	bg, gb := testutil.NewBlockGenerator(t, "testLedger", false)
 	gbHash := gb.Header.Hash()
@@ -114,9 +115,10 @@ func TestKVLedgerBlockStorage(t *testing.T) {
 func TestKVLedgerDBRecovery(t *testing.T) {
 	ledgertestutil.SetupCoreYAMLConfig()
 	env := newTestEnv(t)
-	defer env.cleanup()
+	//defer env.cleanup()
 	provider, _ := NewProvider()
 	defer provider.Close()
+	defer cleanup(provider, env)
 
 	bg, gb := testutil.NewBlockGenerator(t, "testLedger", false)
 	ledger, _ := provider.Create(gb)
@@ -450,9 +452,10 @@ func TestLedgerWithCouchDbEnabledWithBinaryAndJSONData(t *testing.T) {
 		ledgerconfig.IsCouchDBEnabled(), ledgerconfig.IsHistoryDBEnabled())
 
 	env := newTestEnv(t)
-	defer env.cleanup()
+	//defer env.cleanup()
 	provider, _ := NewProvider()
 	defer provider.Close()
+	defer cleanup(provider, env)
 	bg, gb := testutil.NewBlockGenerator(t, "testLedger", false)
 	gbHash := gb.Header.Hash()
 	ledger, _ := provider.Create(gb)
