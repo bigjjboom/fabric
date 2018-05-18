@@ -53,6 +53,10 @@ func (mbsp *mockBlockStoreProvider) List() ([]string, error) {
 func (mbsp *mockBlockStoreProvider) Close() {
 }
 
+func (mbsp *mockBlockStoreProvider) DropTable() {
+
+}
+
 func TestBlockstoreProviderError(t *testing.T) {
 	flf := &fileLedgerFactory{
 		blkstorageProvider: &mockBlockStoreProvider{error: fmt.Errorf("blockstorage provider error")},
