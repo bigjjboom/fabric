@@ -18,17 +18,17 @@ package leveldbhelper
 
 import (
 	"sync"
+	"strings"
+	"os"
+	"context"
+	"time"
+	"reflect"
 
 	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/tsuna/gohbase"
-	"strings"
-	"os"
 	"github.com/tsuna/gohbase/hrpc"
-	"context"
-	"time"
-	"reflect"
 )
 
 var logger = flogging.MustGetLogger("leveldbhelper")
