@@ -73,7 +73,7 @@ func TestLevelDBHelper(t *testing.T) {
 	testutil.AssertNoError(t, err2, "")
 	testutil.AssertEquals(t, string(val2), "")
 
-	db.Close()
+	//db.Close()
 	// second time open should not have any side effect
 	//db.Close()
 	//
@@ -105,6 +105,7 @@ func TestLevelDBHelper(t *testing.T) {
 		keys = append(keys, string(itr.Key()))
 	}
 	testutil.AssertEquals(t, keys, []string{"key1", "key2"})
+	db.Close()
 }
 
 //func TestCreateDBInEmptyDir(t *testing.T) {

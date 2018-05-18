@@ -194,6 +194,7 @@ func (dbInst *DB) Put(key []byte, value []byte, sync bool) error {
 		logger.Errorf("Error while putting value in hbase", err)
 		return err
 	}
+	//
 
 	//wo := dbInst.writeOptsNoSync
 	//if sync {

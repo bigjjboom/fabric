@@ -58,6 +58,10 @@ func (p *Provider) Close() {
 	p.db.Close()
 }
 
+func (p *Provider) DropTable() {
+	p.db.DeleteTable()
+}
+
 // DBHandle is an handle to a named db
 type DBHandle struct {
 	dbName string
@@ -108,6 +112,10 @@ func (h *DBHandle) GetIterator(startKey []byte, endKey []byte) *Iterator {
 	}
 	logger.Debugf("Getting iterator for range [%#v] - [%#v]", sKey, eKey)
 	return &Iterator{h.db.GetIterator(sKey, eKey)}
+}
+
+func (h *DBHandle) DropTable() {
+	h.db.DeleteTable()
 }
 
 // UpdateBatch encloses the details of multiple `updates`
