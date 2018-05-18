@@ -23,4 +23,8 @@ services:
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    extra_hosts:
+      - "master:192.168.16.13"
+      - "node1:192.168.16.14"
+      - "node2:192.168.16.15"
     command: peer node start

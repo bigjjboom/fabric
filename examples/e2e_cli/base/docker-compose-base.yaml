@@ -23,6 +23,10 @@ services:
       - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
       - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    extra_hosts:
+          - "master:192.168.16.13"
+          - "node1:192.168.16.14"
+          - "node2:192.168.16.15"
     command: orderer
     volumes:
     - ../channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
