@@ -36,6 +36,8 @@ type PeerLedgerProvider interface {
 	List() ([]string, error)
 	// Close closes the PeerLedgerProvider
 	Close()
+	//for test clean hbase
+	DropTable()
 }
 
 // PeerLedger differs from the OrdererLedger in that PeerLedger locally maintain a bitmask

@@ -57,6 +57,11 @@ func (provider *VersionedDBProvider) Close() {
 	provider.dbProvider.Close()
 }
 
+func (provider *VersionedDBProvider) DropTable() {
+	provider.dbProvider.DropTable()
+}
+
+
 // VersionedDB implements VersionedDB interface
 type versionedDB struct {
 	db     *leveldbhelper.DBHandle
@@ -78,6 +83,12 @@ func (vdb *versionedDB) Open() error {
 func (vdb *versionedDB) Close() {
 	// do nothing because shared db is used
 }
+
+// DropTable for Hbase test clean
+func (vdb *versionedDB) DropTable() {
+	vdb.db.DropTable()
+}
+
 
 // ValidateKey implements method in VersionedDB interface
 func (vdb *versionedDB) ValidateKey(key string) error {

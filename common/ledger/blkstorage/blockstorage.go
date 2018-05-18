@@ -56,6 +56,7 @@ type BlockStoreProvider interface {
 	Exists(ledgerid string) (bool, error)
 	List() ([]string, error)
 	Close()
+	DropTable()
 }
 
 // BlockStore - an interface for persisting and retrieving blocks

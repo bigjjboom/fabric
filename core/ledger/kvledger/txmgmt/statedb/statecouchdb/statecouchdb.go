@@ -87,6 +87,10 @@ func (provider *VersionedDBProvider) Close() {
 	// No close needed on Couch
 }
 
+func (provider *VersionedDBProvider) DropTable() {
+	// No close needed on Couch
+}
+
 // VersionedDB implements VersionedDB interface
 type VersionedDB struct {
 	db     *couchdb.CouchDatabase
@@ -113,6 +117,11 @@ func (vdb *VersionedDB) Open() error {
 func (vdb *VersionedDB) Close() {
 	// no need to close db since a shared couch instance is used
 }
+
+func (vdb *VersionedDB) DropTable()  {
+	// do nothing, do not use couchdb
+}
+
 
 // ValidateKey implements method in VersionedDB interface
 func (vdb *VersionedDB) ValidateKey(key string) error {

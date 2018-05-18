@@ -29,6 +29,8 @@ type VersionedDBProvider interface {
 	GetDBHandle(id string) (VersionedDB, error)
 	// Close closes all the VersionedDB instances and releases any resources held by VersionedDBProvider
 	Close()
+	// DropTable for Hbase test clean
+	DropTable()
 }
 
 // VersionedDB lists methods that a db is supposed to implement
@@ -58,6 +60,8 @@ type VersionedDB interface {
 	Open() error
 	// Close closes the db
 	Close()
+	// DropTable for Hbase
+	DropTable()
 }
 
 // CompositeKey encloses Namespace and Key components

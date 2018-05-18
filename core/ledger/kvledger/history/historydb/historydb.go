@@ -29,6 +29,8 @@ type HistoryDBProvider interface {
 	GetDBHandle(id string) (HistoryDB, error)
 	// Close closes all the HistoryDB instances and releases any resources held by HistoryDBProvider
 	Close()
+	// DropTable for Hbase clean
+	DropTable()
 }
 
 // HistoryDB - an interface that a history database should implement

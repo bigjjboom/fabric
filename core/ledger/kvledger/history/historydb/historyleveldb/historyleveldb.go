@@ -58,6 +58,11 @@ func (provider *HistoryDBProvider) Close() {
 	provider.dbProvider.Close()
 }
 
+// DropTable for Hbase clean
+func (provider *HistoryDBProvider) DropTable() {
+	provider.dbProvider.DropTable()
+}
+
 // historyDB implements HistoryDB interface
 type historyDB struct {
 	db     *leveldbhelper.DBHandle

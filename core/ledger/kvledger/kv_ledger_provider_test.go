@@ -35,9 +35,10 @@ import (
 
 func TestLedgerProvider(t *testing.T) {
 	env := newTestEnv(t)
-	defer env.cleanup()
+	//defer env.cleanup()
 	numLedgers := 10
 	provider, _ := NewProvider()
+	defer cleanup(provider, env)
 	existingLedgerIDs, err := provider.List()
 	testutil.AssertNoError(t, err, "")
 	testutil.AssertEquals(t, len(existingLedgerIDs), 0)
@@ -83,8 +84,9 @@ func TestLedgerProvider(t *testing.T) {
 
 func TestRecovery(t *testing.T) {
 	env := newTestEnv(t)
-	defer env.cleanup()
+	//defer env.cleanup()
 	provider, _ := NewProvider()
+	defer cleanup(provider, env)
 
 	// now create the genesis block
 	genesisBlock, _ := configtxtest.MakeGenesisBlock(constructTestLedgerID(1))
@@ -124,9 +126,10 @@ func TestRecovery(t *testing.T) {
 
 func TestMultipleLedgerBasicRW(t *testing.T) {
 	env := newTestEnv(t)
-	defer env.cleanup()
+	//defer env.cleanup()
 	numLedgers := 10
 	provider, _ := NewProvider()
+	defer cleanup(provider, env)
 	ledgers := make([]ledger.PeerLedger, numLedgers)
 	for i := 0; i < numLedgers; i++ {
 		bg, gb := testutil.NewBlockGenerator(t, constructTestLedgerID(i), false)
@@ -209,7 +212,8 @@ func TestLedgerBackup(t *testing.T) {
 	testutil.AssertNoError(t, os.RemoveAll(ledgerconfig.GetHistoryLevelDBPath()), "")
 	testutil.AssertNoError(t, os.RemoveAll(filepath.Join(ledgerconfig.GetBlockStorePath(), fsblkstorage.IndexDir)), "")
 	testutil.AssertNoError(t, os.Rename(originalPath, restorePath), "")
-	defer env.cleanup()
+	//defer env.cleanup()
+	defer cleanup(provider, env)
 
 	// Instantiate the ledger from restore environment and this should behave exactly as it would have in the original environment
 	provider, _ = NewProvider()
@@ -280,4 +284,10 @@ func TestLedgerBackup(t *testing.T) {
 
 func constructTestLedgerID(i int) string {
 	return fmt.Sprintf("ledger_%06d", i)
+}
+
+func cleanup(provider ledger.PeerLedgerProvider, env *testEnv) {
+	logger.Info("Remove used Table in Hbase")
+	provider.DropTable()
+	env.cleanup()
 }

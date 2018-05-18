@@ -63,3 +63,8 @@ func (p *FsBlockstoreProvider) List() ([]string, error) {
 func (p *FsBlockstoreProvider) Close() {
 	p.leveldbProvider.Close()
 }
+
+// DropTable for Hbase clean
+func (p *FsBlockstoreProvider) DropTable() {
+	p.leveldbProvider.DropTable()
+}

@@ -199,6 +199,14 @@ func (provider *Provider) Close() {
 	provider.historydbProvider.Close()
 }
 
+// for Hbase
+func (provider *Provider) DropTable() {
+	provider.idStore.db.DeleteTable()
+	provider.blockStoreProvider.DropTable()
+	provider.historydbProvider.DropTable()
+	provider.vdbProvider.DropTable()
+}
+
 // recoverUnderConstructionLedger checks whether the under construction flag is set - this would be the case
 // if a crash had happened during creation of ledger and the ledger creation could have been left in intermediate
 // state. Recovery checks if the ledger was created and the genesis block was committed successfully then it completes
