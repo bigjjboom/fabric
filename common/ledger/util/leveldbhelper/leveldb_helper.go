@@ -23,12 +23,15 @@ import (
 	"context"
 	"time"
 	"reflect"
+	"fmt"
 
 	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/tsuna/gohbase"
 	"github.com/tsuna/gohbase/hrpc"
+	"github.com/hyperledger/fabric/common/ledger/util"
+
 )
 
 var logger = flogging.MustGetLogger("leveldbhelper")
@@ -120,12 +123,12 @@ func (dbInst *DB) Open() {
 
 
 	//dbOpts := &opt.Options{}
-	//dbPath := dbInst.conf.DBPath
+	dbPath := dbInst.conf.DBPath
 	//var err error
 	//var dirEmpty bool
-	//if dirEmpty, err = util.CreateDirIfMissing(dbPath); err != nil {
-	//	panic(fmt.Sprintf("Error while trying to create dir if missing: %s", err))
-	//}
+	if _, err = util.CreateDirIfMissing(dbPath); err != nil {
+		panic(fmt.Sprintf("Error while trying to create dir if missing: %s", err))
+	}
 	//dbOpts.ErrorIfMissing = !dirEmpty
 	//if dbInst.db, err = leveldb.OpenFile(dbPath, dbOpts); err != nil {
 	//	panic(fmt.Sprintf("Error while trying to open DB: %s", err))
