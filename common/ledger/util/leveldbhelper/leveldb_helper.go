@@ -69,7 +69,8 @@ func CreateDB(conf *Conf) *DB {
 	//writeOptsSync := &opt.WriteOptions{}
 	//writeOptsSync.Sync = true
 
-	path := strings.Split(conf.DBPath, "/")
+	dbPath := conf.DBPath
+	path := strings.Split(dbPath, "/")
 	ledgerhost, _ := os.Hostname()
 	table := strings.Replace(path[len(path)-2], "-", "_", -1) + "_" + path[len(path)-1] + ledgerhost
 	host := "192.168.16.13:4181"
