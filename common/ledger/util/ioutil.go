@@ -18,15 +18,16 @@ package util
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
 
 	"github.com/hyperledger/fabric/common/flogging"
+	"github.com/colinmarc/hdfs"
 )
 
 var logger = flogging.MustGetLogger("kvledger.util")
+var hdfsHost = "localhost:8020"
 
 // CreateDirIfMissing creates a dir for dirPath if not already exists. If the dir is empty it returns true
 func CreateDirIfMissing(dirPath string) (bool, error) {
@@ -36,7 +37,16 @@ func CreateDirIfMissing(dirPath string) (bool, error) {
 	}
 	logger.Debugf("CreateDirIfMissing [%s]", dirPath)
 	logDirStatus("Before creating dir", dirPath)
-	err := os.MkdirAll(path.Dir(dirPath), 0755)
+	//err := os.MkdirAll(path.Dir(dirPath), 0755)
+	//
+	client, err := hdfs.New(hdfsHost)
+	defer client.Close()
+	if err != nil {
+		logger.Debugf("Error while creating hdfs client [%s]", err)
+		return false, err
+	}
+	err = client.MkdirAll(path.Dir(dirPath), 0755)
+	//
 	if err != nil {
 		logger.Debugf("Error while creating dir [%s]", dirPath)
 		return false, err
@@ -47,7 +57,16 @@ func CreateDirIfMissing(dirPath string) (bool, error) {
 
 // DirEmpty returns true if the dir at dirPath is empty
 func DirEmpty(dirPath string) (bool, error) {
-	f, err := os.Open(dirPath)
+	//
+	client, err := hdfs.New(hdfsHost)
+	defer client.Close()
+	if err != nil {
+		logger.Debugf("Error while creating hdfs client [%s]", err)
+		return false, err
+	}
+	//f, err := os.Open(dirPath)
+	//
+	f, err := client.Open(dirPath)
 	if err != nil {
 		logger.Debugf("Error while opening dir [%s]: %s", dirPath, err)
 		return false, err
@@ -64,7 +83,16 @@ func DirEmpty(dirPath string) (bool, error) {
 // FileExists checks whether the given file exists.
 // If the file exists, this method also returns the size of the file.
 func FileExists(filePath string) (bool, int64, error) {
-	fileInfo, err := os.Stat(filePath)
+	//
+	client, err := hdfs.New(hdfsHost)
+	defer client.Close()
+	if err != nil {
+		logger.Debugf("Error while creating hdfs client [%s]", err)
+		return false, 0, err
+	}
+	//fileInfo, err := os.Stat(filePath)
+	fileInfo, err := client.Stat(filePath)
+	//
 	if os.IsNotExist(err) {
 		return false, 0, nil
 	}
@@ -74,7 +102,15 @@ func FileExists(filePath string) (bool, int64, error) {
 // ListSubdirs returns the subdirectories
 func ListSubdirs(dirPath string) ([]string, error) {
 	subdirs := []string{}
-	files, err := ioutil.ReadDir(dirPath)
+	//
+	client, err := hdfs.New(hdfsHost)
+	defer client.Close()
+	if err != nil {
+		logger.Debugf("Error while creating hdfs client [%s]", err)
+		return nil, err
+	}
+	//files, err := ioutil.ReadDir(dirPath)
+	files, err := client.ReadDir(dirPath)
 	if err != nil {
 		return nil, err
 	}

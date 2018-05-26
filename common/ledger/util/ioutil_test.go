@@ -18,12 +18,12 @@ package util
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/hyperledger/fabric/common/ledger/testutil"
 	"github.com/stretchr/testify/assert"
+	"github.com/colinmarc/hdfs"
 )
 
 var dbPathTest = "/tmp/ledgertests/common/ledger/util"
@@ -96,7 +96,9 @@ func TestListSubdirs(t *testing.T) {
 	cleanup(dbPathTest)
 	defer cleanup(dbPathTest)
 	for _, folder := range childFolders {
-		assert.NoError(t, os.MkdirAll(filepath.Join(dbPathTest, folder), 0755))
+		//assert.NoError(t, os.MkdirAll(filepath.Join(dbPathTest, folder), 0755))
+		_, err := CreateDirIfMissing(filepath.Join(dbPathTest, folder))
+		assert.NoError(t, err)
 	}
 	subFolders, err := ListSubdirs(dbPathTest)
 	assert.NoError(t, err)
@@ -105,16 +107,32 @@ func TestListSubdirs(t *testing.T) {
 
 func createAndWriteAFile(sentence string) (int, error) {
 	//create a file in the directory
-	f, err2 := os.Create(dbFileTest)
+	//f, err2 := os.Create(dbFileTest)
+	client, err := hdfs.New(hdfsHost)
+	defer client.Close()
+	if err != nil {
+		logger.Debugf("Error while creating hdfs client [%s]", err)
+	}
+	f, err2 := client.Create(dbFileTest)
+	//
 	if err2 != nil {
 		return 0, err2
 	}
 	defer f.Close()
 
 	//write to the file
-	return f.WriteString(sentence)
+	return f.Write([]byte(sentence))
 }
 
 func cleanup(path string) {
-	os.RemoveAll(path)
+	//os.RemoveAll(path)
+	client, err := hdfs.New(hdfsHost)
+	defer client.Close()
+	if err != nil {
+		logger.Debugf("Error while creating hdfs client [%s]", err)
+	}
+	err = client.Remove(path)
+	if err != nil {
+		logger.Debugf("Error while trying to remove file or path [%s]", err)
+	}
 }
