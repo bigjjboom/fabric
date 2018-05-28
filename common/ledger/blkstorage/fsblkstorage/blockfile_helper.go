@@ -8,13 +8,13 @@ package fsblkstorage
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hyperledger/fabric/protos/common"
+	"github.com/colinmarc/hdfs"
 )
 
 // constructCheckpointInfoFromBlockFiles scans the last blockfile (if any) and construct the checkpoint info
@@ -80,7 +80,15 @@ func constructCheckpointInfoFromBlockFiles(rootDir string) (*checkpointInfo, err
 func retrieveLastFileSuffix(rootDir string) (int, error) {
 	logger.Debugf("retrieveLastFileSuffix()")
 	biggestFileNum := -1
-	filesInfo, err := ioutil.ReadDir(rootDir)
+	//filesInfo, err := ioutil.ReadDir(rootDir)
+	client, err := hdfs.New(hdfsHost)
+	defer client.Close()
+	if err != nil {
+		logger.Debugf("Error while creating hdfs client [%s]", err)
+		return -1, err
+	}
+	filesInfo, err := client.ReadDir(rootDir)
+	//
 	if err != nil {
 		return -1, err
 	}

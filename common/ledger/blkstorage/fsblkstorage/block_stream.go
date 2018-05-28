@@ -24,6 +24,7 @@ import (
 	"os"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/colinmarc/hdfs"
 )
 
 // ErrUnexpectedEndOfBlockfile error used to indicate an unexpected end of a file segment
@@ -31,11 +32,16 @@ import (
 // get written towards the end of the file
 var ErrUnexpectedEndOfBlockfile = errors.New("unexpected end of blockfile")
 
+// hdfsHosts is the hadoop file system service provide host:port
+var hdfsHost = "localhost:8020"
+
 // blockfileStream reads blocks sequentially from a single file.
 // It starts from the given offset and can traverse till the end of the file
 type blockfileStream struct {
 	fileNum       int
-	file          *os.File
+	//file          *os.File
+	client 		  *hdfs.Client
+	file          *hdfs.FileReader
 	reader        *bufio.Reader
 	currentOffset int64
 }
@@ -64,11 +70,22 @@ type blockPlacementInfo struct {
 func newBlockfileStream(rootDir string, fileNum int, startOffset int64) (*blockfileStream, error) {
 	filePath := deriveBlockfilePath(rootDir, fileNum)
 	logger.Debugf("newBlockfileStream(): filePath=[%s], startOffset=[%d]", filePath, startOffset)
-	var file *os.File
-	var err error
-	if file, err = os.OpenFile(filePath, os.O_RDONLY, 0600); err != nil {
+	//
+	client, err := hdfs.New(hdfsHost)
+	if err != nil {
+		logger.Debugf("Error while creating hdfs client [%s]", err)
 		return nil, err
 	}
+	//var file *os.File
+	var file *hdfs.FileReader
+	//var err error
+	//if file, err = os.OpenFile(filePath, os.O_RDONLY, 0600); err != nil {
+	//	return nil, err
+	//}
+	if file, err = client.Open(filePath); err != nil {
+		return nil, err
+	}
+	//
 	var newPosition int64
 	if newPosition, err = file.Seek(startOffset, 0); err != nil {
 		return nil, err
@@ -77,7 +94,7 @@ func newBlockfileStream(rootDir string, fileNum int, startOffset int64) (*blockf
 		panic(fmt.Sprintf("Could not seek file [%s] to given startOffset [%d]. New position = [%d]",
 			filePath, startOffset, newPosition))
 	}
-	s := &blockfileStream{fileNum, file, bufio.NewReader(file), startOffset}
+	s := &blockfileStream{fileNum, client,file, bufio.NewReader(file), startOffset}
 	return s, nil
 }
 
@@ -96,8 +113,9 @@ func (s *blockfileStream) nextBlockBytesAndPlacementInfo() ([]byte, *blockPlacem
 	var fileInfo os.FileInfo
 	moreContentAvailable := true
 
-	if fileInfo, err = s.file.Stat(); err != nil {
-		return nil, nil, err
+	if fileInfo = s.file.Stat(); fileInfo == nil {
+		logger.Debugf("fileInfo is None")
+		return nil, nil, nil
 	}
 	if s.currentOffset == fileInfo.Size() {
 		logger.Debugf("Finished reading file number [%d]", s.fileNum)
@@ -149,7 +167,15 @@ func (s *blockfileStream) nextBlockBytesAndPlacementInfo() ([]byte, *blockPlacem
 }
 
 func (s *blockfileStream) close() error {
-	return s.file.Close()
+	err := s.file.Close()
+	if err != nil {
+		return err
+	}
+	err = s.client.Close()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 ///////////////////////////////////
