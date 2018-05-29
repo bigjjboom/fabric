@@ -86,7 +86,11 @@ func (w *blockfileWriter) open() error {
 	}
 	file, err := client.Create(w.filePath)
 	if err != nil {
-		return err
+		logger.Debugf("Error while creating hdfs file [%s], then trying open", err)
+		file, err = client.Append(w.filePath)
+		if err != nil {
+			return err
+		}
 	}
 	w.file = file
 	w.client = client

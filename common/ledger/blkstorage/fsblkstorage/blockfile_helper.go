@@ -117,7 +117,16 @@ func isBlockFileName(name string) bool {
 
 func getFileInfoOrPanic(rootDir string, fileNum int) os.FileInfo {
 	filePath := deriveBlockfilePath(rootDir, fileNum)
-	fileInfo, err := os.Lstat(filePath)
+	//fileInfo, err := os.Lstat(filePath)
+	//
+	client, err := hdfs.New(hdfsHost)
+	defer client.Close()
+	if err != nil {
+		logger.Debugf("Error while creating hdfs client [%s]", err)
+		return nil
+	}
+	fileInfo, err := client.Stat(filePath)
+	//
 	if err != nil {
 		panic(fmt.Errorf("Error in retrieving file info for file num = %d", fileNum))
 	}
