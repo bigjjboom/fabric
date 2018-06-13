@@ -136,6 +136,7 @@ func newBlockfileMgr(id string, conf *Conf, indexConfig *blkstorage.IndexConfig,
 		panic(fmt.Sprintf("Could not open writer to current file: %s", err))
 	}
 	//Truncate the file to remove excess past last block
+
 	err = currentFileWriter.truncateFile(cpInfo.latestFileChunksize)
 	if err != nil {
 		panic(fmt.Sprintf("Could not truncate current file to known size in db: %s", err))
@@ -262,6 +263,8 @@ func (mgr *blockfileMgr) addBlock(block *common.Block) error {
 	blockBytesLen := len(blockBytes)
 	blockBytesEncodedLen := proto.EncodeVarint(uint64(blockBytesLen))
 	totalBytesToAppend := blockBytesLen + len(blockBytesEncodedLen)
+
+	logger.Debugf("currentOffset [%d] blockBytesLen [%d] and totalBytesToAppend [%d]", currentOffset, blockBytesLen, totalBytesToAppend)
 
 	//Determine if we need to start a new file since the size of this block
 	//exceeds the amount of space left in the current file

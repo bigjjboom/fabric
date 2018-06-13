@@ -88,28 +88,28 @@
 			"revisionTime": "2017-07-12T05:57:35Z"
 		},
 		{
-			"checksumSHA1": "vFAl1TytyAC0KcEmASP9KVGvFlY=",
+			"checksumSHA1": "xZ/8krzqN8SVy7hFmUFDpkT33Dk=",
 			"path": "github.com/colinmarc/hdfs",
-			"revision": "69e5098fa51e208a466aef9a5283b0101e6e4f54",
-			"revisionTime": "2017-10-26T15:29:14Z"
+			"revision": "84dbd0998bfdb4cd6af8ea1aaa7d7db77431b1ae",
+			"revisionTime": "2018-04-17T14:47:03Z"
 		},
 		{
-			"checksumSHA1": "OgVPAECpU7iL1R/X33WI0iARwu0=",
+			"checksumSHA1": "Df/kIBSotB1Rf01cLS5VsKzS7Gk=",
 			"path": "github.com/colinmarc/hdfs/protocol/hadoop_common",
-			"revision": "69e5098fa51e208a466aef9a5283b0101e6e4f54",
-			"revisionTime": "2017-10-26T15:29:14Z"
+			"revision": "84dbd0998bfdb4cd6af8ea1aaa7d7db77431b1ae",
+			"revisionTime": "2018-04-17T14:47:03Z"
 		},
 		{
-			"checksumSHA1": "+guxSKBBg0D8+toJz53JfdXYolg=",
+			"checksumSHA1": "lj7zUuOzALxNGngm3cEwIFi23Ho=",
 			"path": "github.com/colinmarc/hdfs/protocol/hadoop_hdfs",
-			"revision": "69e5098fa51e208a466aef9a5283b0101e6e4f54",
-			"revisionTime": "2017-10-26T15:29:14Z"
+			"revision": "84dbd0998bfdb4cd6af8ea1aaa7d7db77431b1ae",
+			"revisionTime": "2018-04-17T14:47:03Z"
 		},
 		{
-			"checksumSHA1": "s6CevCSCys21SbTE43kijuVJQqA=",
+			"checksumSHA1": "8axR7HSAbiHZTMCmnQzaotLGREQ=",
 			"path": "github.com/colinmarc/hdfs/rpc",
-			"revision": "69e5098fa51e208a466aef9a5283b0101e6e4f54",
-			"revisionTime": "2017-10-26T15:29:14Z"
+			"revision": "84dbd0998bfdb4cd6af8ea1aaa7d7db77431b1ae",
+			"revisionTime": "2018-04-17T14:47:03Z"
 		},
 		{
 			"path": "github.com/cpuguy83/go-md2man/md2man",

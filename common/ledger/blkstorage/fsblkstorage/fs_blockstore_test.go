@@ -16,25 +16,25 @@ limitations under the License.
 
 package fsblkstorage
 
-import (
-	"testing"
-
-	"github.com/hyperledger/fabric/common/ledger/testutil"
-)
-
-func TestWrongBlockNumber(t *testing.T) {
-	env := newTestEnv(t, NewConf(testPath(), 0))
-	defer env.Cleanup()
-
-	provider := env.provider
-	store, _ := provider.OpenBlockStore("testLedger")
-	defer store.Shutdown()
-
-	blocks := testutil.ConstructTestBlocks(t, 5)
-	for i := 0; i < 3; i++ {
-		err := store.AddBlock(blocks[i])
-		testutil.AssertNoError(t, err, "")
-	}
-	err := store.AddBlock(blocks[4])
-	testutil.AssertError(t, err, "Error shold have been thrown when adding block number 4 while block number 3 is expected")
-}
+//import (
+//	"testing"
+//
+//	"github.com/hyperledger/fabric/common/ledger/testutil"
+//)
+//
+//func TestWrongBlockNumber(t *testing.T) {
+//	env := newTestEnv(t, NewConf(testPath(), 0))
+//	defer env.Cleanup()
+//
+//	provider := env.provider
+//	store, _ := provider.OpenBlockStore("testLedger")
+//	defer store.Shutdown()
+//
+//	blocks := testutil.ConstructTestBlocks(t, 5)
+//	for i := 0; i < 3; i++ {
+//		err := store.AddBlock(blocks[i])
+//		testutil.AssertNoError(t, err, "")
+//	}
+//	err := store.AddBlock(blocks[4])
+//	testutil.AssertError(t, err, "Error shold have been thrown when adding block number 4 while block number 3 is expected")
+//}

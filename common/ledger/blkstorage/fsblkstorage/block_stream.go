@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/colinmarc/hdfs"
@@ -39,6 +40,7 @@ var hdfsHost = "localhost:8020"
 // It starts from the given offset and can traverse till the end of the file
 type blockfileStream struct {
 	fileNum       int
+	filePath 	  string
 	//file          *os.File
 	client 		  *hdfs.Client
 	file          *hdfs.FileReader
@@ -83,7 +85,18 @@ func newBlockfileStream(rootDir string, fileNum int, startOffset int64) (*blockf
 	//	return nil, err
 	//}
 	if file, err = client.Open(filePath); err != nil {
-		return nil, err
+		logger.Debugf("Error [%s] while trying to open [%s], try again after 1 second", err, filePath)
+		for i := 0 ; i < 3 ; i++ {
+			time.Sleep(time.Second * 1)
+			if file, err = client.Open(filePath); err == nil {
+				logger.Debugf("open file [%s] success!", filePath)
+				break
+			}
+		}
+		if err != nil {
+			logger.Debugf("Trying open [%s] 4 times failed [%s]", filePath, err)
+			return nil, err
+		}
 	}
 	//
 	var newPosition int64
@@ -94,7 +107,7 @@ func newBlockfileStream(rootDir string, fileNum int, startOffset int64) (*blockf
 		panic(fmt.Sprintf("Could not seek file [%s] to given startOffset [%d]. New position = [%d]",
 			filePath, startOffset, newPosition))
 	}
-	s := &blockfileStream{fileNum, client,file, bufio.NewReader(file), startOffset}
+	s := &blockfileStream{fileNum, filePath ,client,file, bufio.NewReader(file), startOffset}
 	return s, nil
 }
 
@@ -113,7 +126,22 @@ func (s *blockfileStream) nextBlockBytesAndPlacementInfo() ([]byte, *blockPlacem
 	var fileInfo os.FileInfo
 	moreContentAvailable := true
 
-	if fileInfo = s.file.Stat(); fileInfo == nil {
+	fileInfo,_ = s.client.Stat(s.filePath)
+	if s.file.Stat().Size() != fileInfo.Size() {
+		logger.Debugf("There is some change in file!")
+		s.file.Close()
+		file, err := s.client.Open(s.filePath)
+		if err != nil {
+			logger.Debugf("Error[%s] while trying to Reopen file[%s]", err, s.filePath)
+			return nil, nil, err
+		}
+		//s.reader = bufio.NewReader(file)
+		s.reader.Reset(file)
+		s.file = file
+		s.reader.Discard(int(s.currentOffset))
+	}
+
+	if fileInfo == nil {
 		logger.Debugf("fileInfo is None")
 		return nil, nil, nil
 	}
@@ -130,10 +158,13 @@ func (s *blockfileStream) nextBlockBytesAndPlacementInfo() ([]byte, *blockPlacem
 		moreContentAvailable = false
 	}
 	logger.Debugf("Remaining bytes=[%d], Going to peek [%d] bytes", remainingBytes, peekBytes)
+
 	if lenBytes, err = s.reader.Peek(peekBytes); err != nil {
+		logger.Debugf("Peek 8 Bytes error!")
 		return nil, nil, err
 	}
 	length, n := proto.DecodeVarint(lenBytes)
+	logger.Debugf("Get length [%d] and n [%d] from file", length, n)
 	if n == 0 {
 		// proto.DecodeVarint did not consume any byte at all which means that the bytes
 		// representing the size of the block are partial bytes

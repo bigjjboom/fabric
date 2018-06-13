@@ -18,6 +18,7 @@ package fsblkstorage
 
 import (
 	"github.com/colinmarc/hdfs"
+	"time"
 )
 
 ////  WRITER ////
@@ -35,40 +36,49 @@ func newBlockfileWriter(filePath string) (*blockfileWriter, error) {
 
 func (w *blockfileWriter) truncateFile(targetSize int) error {
 	//
-	//client, err := hdfs.New(hdfsHost)
-	//defer client.Close()
-	//if err != nil {
-	//	logger.Debugf("Error while creating hdfs client [%s]", err)
-	//	return err
-	//}
 	fileStat, err := w.client.Stat(w.filePath)
 	if err != nil {
 		return err
 	}
 	if fileStat.Size() > int64(targetSize) {
 		//w.file.Truncate(int64(targetSize))
-		w.client.Truncate(w.filePath, uint64(targetSize))
+		err = w.file.Close()
+		if err != nil {
+			return err
+		}
+		if err = w.client.Truncate(w.filePath, uint64(targetSize)); err != nil {
+			return err
+		}
+		time.Sleep(3 * time.Second)
+		file, err := w.client.Append(w.filePath)
+		if err != nil {
+			logger.Debugf("Error while append block file [%s]", err)
+			return err
+		}
+		w.file = file
 	}
 	return nil
 }
 
 func (w *blockfileWriter) append(b []byte, sync bool) error {
-	//_, err := w.file.Write(b)
-	//client, err := hdfs.New(hdfsHost)
-	//defer client.Close()
-	//if err != nil {
-	//	logger.Debugf("Error while creating hdfs client [%s]", err)
-	//	return err
-	//}
-	//fileWriter, err := client.Append(w.filePath)
-	//if err != nil {
-	//	return err
-	//}
-	//defer fileWriter.Close()
 	_, err := w.file.Write(b)
 	if err != nil {
 		return err
 	}
+	err = w.file.Flush()
+	if err != nil {
+		return err
+	}
+	err = w.file.Close()
+	if err != nil {
+		return err
+	}
+	file, err := w.client.Append(w.filePath)
+	if err != nil {
+		logger.Debugf("Error while append block file [%s]", err)
+		return err
+	}
+	w.file = file
 	//
 	//if sync {
 	//	return w.file.Sync()
@@ -79,7 +89,6 @@ func (w *blockfileWriter) append(b []byte, sync bool) error {
 func (w *blockfileWriter) open() error {
 	//file, err := os.OpenFile(w.filePath, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
 	client, err := hdfs.New(hdfsHost)
-	//defer client.Close()
 	if err != nil {
 		logger.Debugf("Error while creating hdfs client [%s]", err)
 		return err

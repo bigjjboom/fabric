@@ -139,8 +139,10 @@ func iterateInBackground(t *testing.T, itr *blocksItr, quitAfterBlkNum uint64, w
 
 func testIterateAndVerify(t *testing.T, itr *blocksItr, blocks []*common.Block, doneChan chan bool) {
 	blocksIterated := 0
+	logger.Debugf("Start testIterateAndVerify-----------------------------")
 	for {
 		t.Logf("blocksIterated: %v", blocksIterated)
+		logger.Debugf("blocksIterated: %v", blocksIterated)
 		block, err := itr.Next()
 		testutil.AssertNoError(t, err, "")
 		testutil.AssertEquals(t, block, blocks[blocksIterated])
@@ -150,6 +152,7 @@ func testIterateAndVerify(t *testing.T, itr *blocksItr, blocks []*common.Block, 
 		}
 	}
 	doneChan <- true
+	logger.Debugf("End testIterateAndVerify-----------------------------")
 }
 
 func testAppendBlocks(blkfileMgrWrapper *testBlockfileMgrWrapper, blocks []*common.Block) {
