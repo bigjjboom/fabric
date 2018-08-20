@@ -19,6 +19,12 @@
 			"revision": ""
 		},
 		{
+			"checksumSHA1": "KkQ5Ml5TN4UvyBlYiod4iDzO5PE=",
+			"path": "github.com/Boostport/avatica",
+			"revision": "162a3b3b89677af55d94428775c999b7b4f3c023",
+			"revisionTime": "2017-12-14T10:24:11Z"
+		},
+		{
 			"path": "github.com/BurntSushi/toml",
 			"revision": "056c9bc7be7190eaa7715723883caffa5f8fa3e4",
 			"revisionTime": "2015-05-01T06:40:42-04:00"
