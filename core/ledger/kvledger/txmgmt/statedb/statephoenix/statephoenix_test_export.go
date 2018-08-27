@@ -18,7 +18,10 @@ type TestVDBEnv struct {
 func NewTestVDBEnv(t testing.TB) *TestVDBEnv {
 	t.Logf("Creating new TestVDBEnv")
 
-	dbProvider, _ := NewVersionedDBProvider()
+	dbProvider, err := NewVersionedDBProvider()
+	if err!=nil {
+		t.Errorf("NewDBProvider faill")
+	}
 	testVDBEnv := &TestVDBEnv{t, dbProvider}
 	// No cleanup for new test environment.  Need to cleanup per test for each DB used in the test.
 	return testVDBEnv

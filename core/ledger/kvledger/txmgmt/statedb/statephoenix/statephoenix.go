@@ -42,13 +42,14 @@ func (provider *VersionedDBProvider)GetDBHandle(dbName string) (statedb.Versione
 		}
 		provider.dbName[dbName] = vdb
 	}
-
+	//vdb still is nil?
+	vdb = provider.dbName[dbName]
 	return vdb, nil
 }
 
 func (provider *VersionedDBProvider)Close() {
 	//close Phoenix connection
-	provider.dbProvider.Close()
+	//provider.dbProvider.Close()
 }
 
 type VersionedDB struct {
@@ -61,15 +62,17 @@ type VersionedDB struct {
 func newVersionedDB(dbProvider *sql.DB, dbName string, tablePattern string) (*VersionedDB, error) {
 	err := createPhoenixTable(dbProvider, dbName, tablePattern)
 	if err!=nil {
+		logger.Error(err)
 		return nil, err
 	}
+
 	return &VersionedDB{dbProvider, dbName, sync.RWMutex{}}, nil
 }
 
 func (vdb *VersionedDB)GetState(namespace string, key string) (*statedb.VersionedValue, error)  {
 	logger.Debugf("GetState(). ns=%s, key=%s", namespace, key)
 	compositeKey := constructCompositeKey(namespace, key)
-	sqlString := `SELECT * FROM ` + vdb.tableName + `WHERE cpK = ` + compositeKey
+	sqlString := `SELECT * FROM ` + vdb.tableName + ` WHERE cpK = '` + compositeKey + `'`
 	row, err := queryRows(vdb.phoenixConn, sqlString)
 	defer row.Close()
 	if err != nil {
@@ -80,7 +83,7 @@ func (vdb *VersionedDB)GetState(namespace string, key string) (*statedb.Versione
 		namespaceInTable 	string
 		keyInTable		  	string
 		//should replace value to values
-		valueInTable	  	[]byte
+		valueInTable	  	string
 		blockNumInTable		uint64
 		txNumInTable		uint64
 	)
@@ -90,7 +93,10 @@ func (vdb *VersionedDB)GetState(namespace string, key string) (*statedb.Versione
 			return nil, err
 		}
 	}
-	return &statedb.VersionedValue{Value:valueInTable, Version:version.NewHeight(blockNumInTable, txNumInTable)}, nil
+	if compositeKeyInTable=="" && namespaceInTable=="" && keyInTable=="" && valueInTable=="" && blockNumInTable==0 && txNumInTable==0{
+		return nil, nil
+	}
+	return &statedb.VersionedValue{Value:[]byte(valueInTable), Version:version.NewHeight(blockNumInTable, txNumInTable)}, nil
 }
 
 func (vdb *VersionedDB)GetVersion(namespace string, key string) (*version.Height, error)  {
@@ -121,13 +127,13 @@ func (vdb *VersionedDB)GetStateRangeScanIterator(namespace string, startKey stri
 	compositeEndKey := constructCompositeKey(namespace, endKey)
 	sqlString := `SELECT * FROM ` + vdb.tableName
 	if startKey != "" && endKey == "" {
-		sqlString = sqlString + `WHERE cpK >= ` + compositeStartKey
+		sqlString = sqlString + `WHERE cpK >= '` + compositeStartKey + `'`
 	}
 	if startKey == "" && endKey != "" {
-		sqlString = sqlString + `WHERE cpK <= ` + compositeEndKey
+		sqlString = sqlString + `WHERE cpK <= '` + compositeStartKey + `'`
 	}
 	if startKey != "" && endKey !="" {
-		sqlString = sqlString + `WHERE cpK BETWEEN ` + compositeStartKey + ` AND ` + compositeEndKey
+		sqlString = sqlString + `WHERE cpK BETWEEN '` + compositeStartKey + `' AND '` + compositeEndKey + `'`
 	}
 
 	rows, err := queryRows(vdb.phoenixConn, sqlString)
@@ -154,18 +160,6 @@ func (vdb *VersionedDB)ApplyUpdates(batch *statedb.UpdateBatch, height *version.
 		updates := batch.GetUpdates(ns)
 		sqlDelete := `DELETE FROM `+ vdb.tableName +` WHERE cpK = VALUES(?)`
 		sqlUpsert := `UPSERT INTO ` + vdb.tableName + ` VALUES(?, ?, ?, ?, ?, ?)`
-		dbTransaction, err := vdb.phoenixConn.Begin()
-		if err != nil {
-			return err
-		}
-		stmtDel, err :=	dbTransaction.Prepare(sqlDelete)
-		if err != nil {
-			return err
-		}
-		stmtUps, err := dbTransaction.Prepare(sqlUpsert)
-		if err != nil {
-			return err
-		}
 
 		for k, vv := range updates {
 			var(
@@ -180,20 +174,16 @@ func (vdb *VersionedDB)ApplyUpdates(batch *statedb.UpdateBatch, height *version.
 			logger.Debugf("Channel [%s]: Applying key(string)=[%s]", vdb.tableName, compositeKeyInTable)
 
 			if vv == nil {
-				stmtDel.Exec(compositeKeyInTable)
+				_, err := vdb.phoenixConn.Exec(sqlDelete, compositeKeyInTable)
 				if err != nil {
 					return err
 				}
 			} else {
-				stmtUps.Exec(compositeKeyInTable, namespaceInTable, keyInTable, valueInTable, blockNumInTable, txNumInTable)
+				_, err := vdb.phoenixConn.Exec(sqlUpsert, compositeKeyInTable, namespaceInTable, keyInTable, valueInTable, blockNumInTable, txNumInTable)
 				if err != nil {
 					return err
 				}
 			}
-		}
-		dbTransaction.Commit()
-		if err != nil {
-			return err
 		}
 	}
 	sqlUpsertSavePoint := `UPSERT INTO ` + vdb.tableName + ` VALUES(?, ?, ?, ?, ?, ?)`
@@ -213,12 +203,13 @@ func (vdb *VersionedDB)ApplyUpdates(batch *statedb.UpdateBatch, height *version.
 
 func (vdb *VersionedDB)GetLatestSavePoint() (*version.Height, error)  {
 	savePomit := "savepoint"
-	sqlString := `SELECT * FROM ` + vdb.tableName + `WHERE cpK = ` + savePomit
+	sqlString := `SELECT * FROM ` + vdb.tableName + ` WHERE cpK = '` + savePomit + `'`
 	row, err := queryRows(vdb.phoenixConn, sqlString)
 	defer row.Close()
 	if err != nil {
 		return nil, err
 	}
+
 	var(
 		compositeKeyInTable string
 		namespaceInTable 	string
@@ -233,6 +224,9 @@ func (vdb *VersionedDB)GetLatestSavePoint() (*version.Height, error)  {
 		if err != nil {
 			return nil, err
 		}
+	}
+	if blockNumInTable == 0 && txNumInTable == 0 {
+		return nil, nil
 	}
 	return &version.Height{blockNumInTable, txNumInTable}, nil
 }
@@ -255,7 +249,9 @@ func (vdb *VersionedDB)Close()  {
 
 func createPhoenixTable(dbProvider *sql.DB, dbName string, tablePattern string) error {
 	//create table if not exists?
+
 	sqlString := `CREATE TABLE IF NOT EXISTS ` + dbName + tablePattern
+
 	_, err := dbProvider.Exec(sqlString)
 	return err
 }
@@ -277,7 +273,7 @@ type PhoenixDef struct {
 func GetPhoenixDefinition() *PhoenixDef {
 	driverName := viper.GetString("ledger.state.phoenixConfig.driverName")
 	phoenixDBAddress := viper.GetString("ledger.state.phoenixConfig.phoenixDBAddress")
-	// tablePattern must like this " (id BIGINT PRIMARY KEY,  val VARCHAR) TRANSACTIONAL=true"
+	// tablePattern must like this " (cpK VARCHAR PRIMARY KEY,  ns VARCHAR, pk VARCHAR, pval VARCHAR, blknum BIGINT, txnum BIGINT)"
 	// all types can be find in https://github.com/apache/calcite-avatica-go/blob/master/driver_phoenix_test.go
 	tablePattern := viper.GetString("ledger.state.phoenixConfig.phoenixTablePattern")
 
