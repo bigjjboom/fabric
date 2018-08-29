@@ -917,6 +917,114 @@
 			"revisionTime": "2017-08-24T10:41:20Z"
 		},
 		{
+			"checksumSHA1": "A/a70pwZXqafgWY5MZKo+Hn3zIY=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "8KWVXMuMMyXv3gfLkkRnOijYx6A=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/asn1tools",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "sE825Wbav94I6vqHv7/C5XCrgX4=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/client",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "yGfAI06oj2q2pL8glw+Jj5veb/I=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/config",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "UXlF4q7+61hmNoLyYOVywzM8rD0=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/credentials",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "aQGAqtRhYNdqsiPopRRBdjZnVGc=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/crypto",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "enMMIHCv7mQAsvDslnTBPPSsPws=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/examples",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "LXP5bw4lk+ToEN9TjXGVKGhn5f4=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/gssapi",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "YM8lgDdF2V064oGZUQOO8weqk20=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/iana",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "t7EPbH1NPF3RgK3SsHbEmOniVWY=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/keytab",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "RfIpIimQP7sP8jhu9GobEm4SgZI=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/krberror",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "SxLvaRIIXgyW+DfRiN6EQ7Vk7Bg=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/messages",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "81uV2Sd2Cj+uJLk53Nad3kupc8Y=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/mstypes",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "JNXwshKQ/1TH2siy82KyA2lQ1jc=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/ndr",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "fhyLsTNnL1XxWXGL8N7hjA+SUTc=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/pac",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "Enev20UL68fAnYSlMPuQVO2BQlM=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/service",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "jvLJaB0VaRXi5NnUAvXuVR46Tl8=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/testdata",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
+			"checksumSHA1": "bqlYPWpmiJSzXLhnOxuVLXWpa3o=",
+			"path": "gopkg.in/jcmturner/gokrb5.v4/types",
+			"revision": "e1c433026ac06f967e528af826f87ae63be40807",
+			"revisionTime": "2018-04-21T14:06:08Z"
+		},
+		{
 			"checksumSHA1": "0KwOlQV1dNUh9X8t+5s7nX5bqfk=",
 			"path": "gopkg.in/yaml.v2",
 			"revision": "a3f3340b5840cee44f372bddb5880fcbc419b46a",
