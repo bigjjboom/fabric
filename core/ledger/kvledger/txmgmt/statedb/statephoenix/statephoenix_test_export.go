@@ -40,7 +40,6 @@ func CleanupDB(dbName string) {
 	phoenixDef := GetPhoenixDefinition()
 	phoenixInstance, _ := sql.Open(phoenixDef.DriverName, phoenixDef.URL)
 	dropString := "DROP TABLE IF EXISTS " + dbName
-
 	phoenixInstance.Exec(dropString)
 }
 

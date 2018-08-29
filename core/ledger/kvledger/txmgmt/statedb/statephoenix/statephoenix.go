@@ -123,21 +123,18 @@ func (vdb *VersionedDB)GetStateMultipleKeys(namespace string, keys []string) ([]
 }
 
 func (vdb *VersionedDB)GetStateRangeScanIterator(namespace string, startKey string, endKey string) (statedb.ResultsIterator, error)  {
-	compositeStartKey := constructCompositeKey(namespace, startKey)
-	compositeEndKey := constructCompositeKey(namespace, endKey)
-	sqlString := `SELECT * FROM ` + vdb.tableName
+	sqlString := `SELECT * FROM ` + vdb.tableName + ` WHERE ns = '` + namespace + `'`
 	if startKey != "" && endKey == "" {
-		sqlString = sqlString + `WHERE cpK >= '` + compositeStartKey + `'`
+		sqlString = sqlString + ` AND ` + `pk >= '` + startKey + `'`
 	}
 	if startKey == "" && endKey != "" {
-		sqlString = sqlString + `WHERE cpK <= '` + compositeStartKey + `'`
+		sqlString = sqlString + ` AND ` + `pk < '` + endKey + `'`
 	}
 	if startKey != "" && endKey !="" {
-		sqlString = sqlString + `WHERE cpK BETWEEN '` + compositeStartKey + `' AND '` + compositeEndKey + `'`
+		sqlString = sqlString + ` AND ` + `pk >= '` + startKey + `' AND pk < '` + endKey + `'`
 	}
-
+	//logger.Errorf("line 138 out [%s]", sqlString)
 	rows, err := queryRows(vdb.phoenixConn, sqlString)
-	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +155,7 @@ func (vdb *VersionedDB)ApplyUpdates(batch *statedb.UpdateBatch, height *version.
 	namespace := batch.GetUpdatedNamespaces()
 	for _, ns := range namespace  {
 		updates := batch.GetUpdates(ns)
-		sqlDelete := `DELETE FROM `+ vdb.tableName +` WHERE cpK = VALUES(?)`
+		sqlDelete := `DELETE FROM `+ vdb.tableName +` WHERE cpK = '`
 		sqlUpsert := `UPSERT INTO ` + vdb.tableName + ` VALUES(?, ?, ?, ?, ?, ?)`
 
 		for k, vv := range updates {
@@ -173,8 +170,9 @@ func (vdb *VersionedDB)ApplyUpdates(batch *statedb.UpdateBatch, height *version.
 			)
 			logger.Debugf("Channel [%s]: Applying key(string)=[%s]", vdb.tableName, compositeKeyInTable)
 
-			if vv == nil {
-				_, err := vdb.phoenixConn.Exec(sqlDelete, compositeKeyInTable)
+			if vv.Value == nil {
+				sqlDeleteString := sqlDelete + compositeKeyInTable + `'`
+				_, err := vdb.phoenixConn.Exec(sqlDeleteString)
 				if err != nil {
 					return err
 				}
@@ -286,13 +284,10 @@ type kvScanner struct {
 }
 
 func newkvScanner(namespace string, rows *sql.Rows) *kvScanner {
-	return &kvScanner{namespace:namespace, rows:rows}
+	return &kvScanner{namespace, rows}
 }
 
 func (scanner *kvScanner) Next() (statedb.QueryResult, error)  {
-	if !scanner.rows.Next() {
-		return nil, nil
-	}
 	var(
 		compositeKeyInTable string
 		namespaceInTable 	string
@@ -302,11 +297,15 @@ func (scanner *kvScanner) Next() (statedb.QueryResult, error)  {
 		blockNumInTable		uint64
 		txNumInTable		uint64
 	)
+	if !scanner.rows.Next() {
+		return nil, nil
+	}
+
 	err := scanner.rows.Scan(&compositeKeyInTable, &namespaceInTable, &keyInTable, &valueInTable, &blockNumInTable, &txNumInTable)
 	if err != nil {
 		return nil, err
 	}
-
+	//logger.Errorf("line 309 out [%s] [%s] [%s] [%s] [%d] [%d]", compositeKeyInTable, namespaceInTable, keyInTable, valueInTable, blockNumInTable, txNumInTable)
 	return &statedb.VersionedKV{
 		CompositeKey:statedb.CompositeKey{namespaceInTable, keyInTable},
 		VersionedValue:statedb.VersionedValue{[]byte(valueInTable), &version.Height{blockNumInTable, txNumInTable}}}, nil

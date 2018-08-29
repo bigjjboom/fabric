@@ -57,6 +57,7 @@ func TestGetStateMultipleKeys(t *testing.T, dbProvider statedb.VersionedDBProvid
 // TestBasicRW tests basic read-write
 func TestBasicRW(t *testing.T, dbProvider statedb.VersionedDBProvider) {
 	db, err := dbProvider.GetDBHandle("testbasicrw")
+	testutil.AssertNotNil(t, db)
 	testutil.AssertNoError(t, err, "")
 
 	// Test that savepoint is nil for a new state db
